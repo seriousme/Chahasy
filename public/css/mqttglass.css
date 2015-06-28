@@ -1,0 +1,10 @@
+body {
+  padding-top: 50px;
+}
+
+li {
+  line-height: 2em;       
+}
+
+.panel { background: #E9E9F7; }
+

@@ -19,7 +19,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="css/starter-template.css" rel="stylesheet">
+    <link href="css/mqttglass.css" rel="stylesheet">
   </head>
 
   <body>
@@ -42,101 +42,13 @@
     </nav>
 
     <div class="container">
-		<div class="panel-group">
+		<ul class="list-group">
+		<li class="list-group-item">
+			{{#if visible.publish }}
+			<h3 onclick="toggle('publish')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span> Publish</h3>
 			
-			<a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseOne" aria-expanded="false" aria-controls="collapseExample">
-				Subscribe
-			</a>
-			<div id="collapseOne" class="collapse">
-				
-					<form>
-						<div class="row">
-							<div class="col-xs-6">
-								<label>Topic</label>
-							</div>
-							<div class="col-xs-2">
-								<label>QoS</label>
-							</div>
-							<div class="col-xs-2">
-								<label>Retain</label>
-							</div>
-						</div>
-						<div class="row">
-						  <div class="col-xs-6">
-							<input type="text" class="form-control" placeholder="e.g. public/me/+">
-						  </div>
-						  <div class="col-xs-2">
-							<select class="form-control">
-								  <option>0 - at most once</option>
-								  <option>1 - at least once</option>
-								  <option>2 - exactly once</option>
-							</select>
-						  </div>
-						  <div class="col-xs-1">
-							<input type="checkbox">
-						  </div>
-						  <div class="col-xs-2">
-							<button type="submit" class="btn btn-default">Publish</button>
-						  </div>
-						</div>
-						<label>Message</label>
-						<textarea class="form-control" rows="3" placeholder="JSON or plain text"></textarea>
-					</form>
-				
-			</div>
-			<div class="panel-default">
-			<div class="panel-header">
-				<h4 class="panel-title">
-					<a class="" role="button" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseExample">
-						Publish
-					</a>
-				</h4>
-			</div>
-			<div id="collapseTwo" class="collapse">
-				<div class="panel-body">
-					<form>
-						<div class="row">
-							<div class="col-xs-6">
-								<label>Topic</label>
-							</div>
-							<div class="col-xs-2">
-								<label>QoS</label>
-							</div>
-							<div class="col-xs-2">
-								<label>Retain</label>
-							</div>
-						</div>
-						<div class="row">
-						  <div class="col-xs-6">
-							<input type="text" class="form-control" placeholder="e.g. public/me/+">
-						  </div>
-						  <div class="col-xs-2">
-							<select class="form-control">
-								  <option>0 - at most once</option>
-								  <option>1 - at least once</option>
-								  <option>2 - exactly once</option>
-							</select>
-						  </div>
-						  <div class="col-xs-1">
-							<input type="checkbox">
-						  </div>
-						  <div class="col-xs-2">
-							<button type="submit" class="btn btn-default">Publish</button>
-						  </div>
-						</div>
-						<label>Message</label>
-						<textarea class="form-control" rows="3" placeholder="JSON or plain text"></textarea>
-					</form>
-				</div>
-			</div>
-			</div>
-			
-			<a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseExample">
-				Messages
-			</a>
-					
-			<div id="collapseThree" class="collapse">
-				<div class="panel-body">
+			<div class="panel">
+				<form onsubmit="return publish(this)">
 					<div class="row">
 						<div class="col-xs-6">
 							<label>Topic</label>
@@ -150,20 +62,139 @@
 					</div>
 					<div class="row">
 					  <div class="col-xs-6">
-						<input type="text" class="form-control" placeholder="e.g. public/me/+">
+						<input name="topic" type="text" class="form-control" placeholder="e.g. public/me/+" required>
 					  </div>
 					  <div class="col-xs-2">
-						0 - at most once
+						<select name="qos" class="form-control">
+							  <option value="0">0 - at most once</option>
+							  <option value="1">1 - at least once</option>
+							  <option value="2">2 - exactly once</option>
+						</select>
 					  </div>
 					  <div class="col-xs-1">
-						<input type="checkbox" class="disabled">
+						<input name="retain" type="checkbox">
+					  </div>
+					  <div class="col-xs-2">
+						<button type="submit" class="btn btn-default">Publish</button>
 					  </div>
 					</div>
 					<label>Message</label>
-					<textarea class="form-control" rows="3" placeholder="JSON or plain text"></textarea>
-				</div>
+					<textarea name="mesg" class="form-control" rows="3" placeholder="JSON or plain text"></textarea>
+				</form>
 			</div>
-		</div>
+			{{else}}
+				<h3 onclick="toggle('publish')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Publish</h3>
+			{{/if }}
+		</li>
+		<li class="list-group-item">
+			{{#if visible.subscribe }}
+				<h3 onclick="toggle('subscribe')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span> Subscribe</h3>
+			<div class="panel">
+				<form onsubmit="return subscribe(this)">
+					<div class="row">
+						<div class="col-xs-6">
+							<label>Topic</label>
+						</div>
+						<div class="col-xs-2">
+							<label>QoS</label>
+						</div>
+					</div>
+					<div class="row">
+					  <div class="col-xs-6">
+						<input name="topic" type="text" class="form-control" placeholder="e.g. public/me/+" required>
+					  </div>
+					  <div class="col-xs-2">
+						<select name="qos" class="form-control">
+							<option value="0">0 - at most once</option>
+							<option value="1">1 - at least once</option>
+							<option value="2">2 - exactly once</option>
+						</select>
+					  </div>
+					  <div class="col-xs-2">
+						<button type="submit" class="btn btn-default">Subscribe</button>
+					  </div>
+					</div>
+				</form>
+			</div>
+			{{else}}
+				<h3 onclick="toggle('subscribe')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Subscribe</h3>
+			{{/if }}
+		</li>
+		
+		{{#if subscriptions.length > 0}}
+		<li class="list-group-item">
+			{{#if visible.subscriptions }}
+			<h3 onclick="toggle('subscriptions')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span> Subscriptions</h3>
+			<div class="panel">
+				<ul class="list-group">
+				{{#subscriptions:i}}
+					<li class="list-group-item panel">
+					    {{#if visible }}
+						<div class="row" >
+							<div class="col-xs-8" onclick="toggleSub({{i}})">
+								<label><span class="glyphicon glyphicon-minus" aria-hidden="true"></span> Topic: {{topic}}</label>
+							</div>
+							<div class="col-xs-2">
+								<span class="badge" title="Messages since subscription">{{numMsg}} msgs</span>
+							</div>
+							<button type="button" class="btn btn-default" aria-label="Delete" onclick="unsubscribe('{{i}}')">Unsubscribe</button>
+						</div>
+						<label>Last {{maxMsg}} messages</label>
+						<table class="table" border="1">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Time</th>
+									<th>Topic</th>
+									<th>QoS</th>
+									<th>Message</th>
+									<th>Packet</th>
+								</tr>
+							</thead>
+							<tbody>
+								{{#messages}}
+								<tr>
+									<td>{{id}}</td>
+									<td>{{time}}</td>
+									<td>{{topic}}</td>
+									<td>{{qos}}</td>
+									<td>{{shorten(mesg,64)}} 
+									{{#if hasDetail(mesg,64)}}
+									<button type="button" class="btn btn-default" aria-label="Details" onclick="showMessage('{{i}}','{{id}}',false)" >
+										<span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
+									</button>
+									{{/if}}
+									</td>
+									<td>
+									<button type="button" class="btn btn-default" aria-label="Details" onclick="showMessage('{{i}}','{{id}}',true)" >
+										<span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
+									</button>
+									</td>
+								</tr>
+								{{/messages}}
+							</tbody>
+						</table>
+						{{else}}
+						<div class="row">
+							<div class="col-xs-8" onclick="toggleSub({{i}})">
+								<label><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Topic: {{topic}}</label>
+							</div>
+							<div class="col-xs-2">
+								<span class="badge" title="Messages since subscription">{{numMsg}} msgs</span>
+							</div>
+							<button type="button" class="btn btn-default" aria-label="Delete" onclick="unsubscribe('{{topic}}')">Unsubscribe</button>
+						</div>
+						{{/if}}
+					</li>
+				{{/subscriptions}}
+				 </ul>
+			</div>
+			{{else}}
+			<h3 onclick="toggle('subscriptions')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Subscriptions</h3>
+			{{/if }}
+		</li>
+		{{/if }}
+		</ul>
     </div><!-- /.container -->
 	<!-- end of ractive template -->
 </script>
@@ -173,6 +204,8 @@
 	<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 	<script src='http://cdn.ractivejs.org/latest/ractive.js'></script>
+	<!-- MQTT client over websockets, automagically served by mosca -->
+	<script src="/mqtt.js"></script>
 	<!-- the application -->
 	<script src='js/mqttglass.js'></script>
   </body>
