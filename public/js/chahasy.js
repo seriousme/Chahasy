@@ -1,22 +1,22 @@
 function setPage(url){
 	var newPage = pageIdx[url];
 	if (typeof(newPage) != 'undefined'){
-		items=pages[newPage].items;
+		var items=pages[newPage].items;
 		//console.log(JSON.stringify(items));
 		ractive.set({
 			pages:pages,
 			items:items,
 			currentPage: url
-		}).then ( function(){ 
+		}).then ( function(){
 			// remove existing handlers if any
 			$('.btn-toggle').unbind('click');
 			// and add a click handler
 			$('.btn-toggle').click(function() {
 				var topic = $(this).data('topic');
-				// setting the value should not be done in the use interface, 
+				// setting the value should not be done in the user interface,
 				// the ui should send the command and pickup the result
 				// for now we do this in the browser
-				
+
 				if (topicIdx[topic].value == "on"){
 					topicIdx[topic].value = "off";
 				}
@@ -27,7 +27,7 @@ function setPage(url){
 				publish(topic, topicIdx[topic].value);
 				// and update the UI
 				ractive.update();
-			})
+			});
 		});
 	}
 }
@@ -44,34 +44,38 @@ function publish(topic,value){
 	console.log('publishing topic:',topic,"value:",value);
 	mqttClient.publish(topic, value);
 }
-	
+
 function initUI(data){
 	var itemIdx={};
-	// Index items 
-	for(var i = 0; i < data.items.length ; i++) {
-		var item = data.items[i];
+
+	// Index items
+	function indexItems(item){
 		itemIdx[item.id] = item;
 		topicIdx[item.topic] = item;
 	}
+	data.items.forEach(indexItems);
+
 	// Index pages by URL and replace items by links to items (if any)
 	
-	for(var i = 0; i < data.pages.length ; i++) {
-		var page = data.pages[i];
-		pages[i] = page;
-		pageIdx[page.url] = i;
-		if ( page.items ){
-			for(var j = 0; j < page.items.length ; j++) {
-				page.items[j] = itemIdx[ page.items[j] ];
-			}
-		}
+	function linkItemData(item,i,arr){
+		arr[i] = itemIdx[ item ];
 	}
+	
+	function indexPages(page,i){
+		 pageIdx[page.url] = i;
+		 if ( page.items ){
+			 page.items.forEach(linkItemData);
+		 }
+		 return page;
+	 }
+	pages = data.pages.map(indexPages);
 	// lets see what we got
 	//console.log(JSON.stringify(pages));
 	//console.log(JSON.stringify(pageIdx));
 	//console.log(JSON.stringify(itemIdx));
 
 	// start at page 0
-	currentPage = pages[0].url;
+	var currentPage = pages[0].url;
 	// did the user jump directly to a specific page ?
 	if (typeof pageIdx[location.hash] != 'undefined'){
 		currentPage = location.hash;
@@ -79,21 +83,21 @@ function initUI(data){
 	// mark this page as active
 	setPage(currentPage);
 	// listen for URL changes
-	window.onhashchange = function(){ setPage(location.hash)};
+	window.onhashchange = function(){ setPage(location.hash);};
 	// subscribe to all topics found
 	mqttClient.subscribe(Object.keys(topicIdx));
-}	
+}
 
-var currentPage, pages=[], items={}, pageIdx={}, topicIdx={}; 
+var pages=[], pageIdx={}, topicIdx={};
 
 // create the ractive object
 var ractive = new Ractive({
 	el: renderOutput,
 	template: '#renderTemplate',
 	data: {
-		formatTemp: function(val){ if (val) { return val + '°' }},
-		publishDimmer: function(topic){ if (topic) { return 'publish("'+topic+'",value)'}},
-		publishClick: function(topic){ if (topic) { return 'publish("'+topic+'","clicked")'}}
+		formatTemp: function(val){ if (val) { return val + '°';}},
+		publishDimmer: function(topic){ if (topic) { return 'publish("'+topic+'",value)';}},
+		publishClick: function(topic){ if (topic) { return 'publish("'+topic+'","clicked")';}}
 	}
 });
 
@@ -113,16 +117,7 @@ mqttClient.on("message", function(topic, payload) {
 		var configData= JSON.parse(message);
 		initUI(configData);
 	}
-	else{ 
+	else{
 		setVal(topic,message);
 	}
 });
-
-
-
-
-
-
-
-
- 
