@@ -1,6 +1,6 @@
-# Mosca on Alpine 
+# Chahasy on Mosca on Alpine
 #
-# VERSION 0.1.0
+# VERSION 0.2.0
 
 FROM mhart/alpine-node
 MAINTAINER Hans Klunder <hans.klunder@bigfoot.com>
