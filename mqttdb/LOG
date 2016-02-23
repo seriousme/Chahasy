@@ -1,5 +1,5 @@
-2015/06/26-20:18:15.634 111c Recovering log #54
-2015/06/26-20:18:15.634 111c Level-0 table #56: started
-2015/06/26-20:18:15.642 111c Level-0 table #56: 209 bytes OK
-2015/06/26-20:18:15.651 111c Delete type=0 #54
-2015/06/26-20:18:15.651 111c Delete type=3 #52
+2016/02/23-16:22:12.291 5a4 Recovering log #6
+2016/02/23-16:22:12.291 5a4 Level-0 table #8: started
+2016/02/23-16:22:12.298 5a4 Level-0 table #8: 209 bytes OK
+2016/02/23-16:22:12.308 5a4 Delete type=0 #6
+2016/02/23-16:22:12.308 5a4 Delete type=3 #4
