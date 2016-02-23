@@ -1,14 +1,10 @@
 // Startup Script for Mosca
 // start this using "node run mosca"
-// if you want to run the rule enigne as well use "node run rules"
+// if you want to run the rule engine as well use "node run rules"
 // see package.json for details
 
 var mosca = require("mosca");
 var server = new mosca.Server({
-  persistence:{
-	path: "./mqttdb",
-	factory: mosca.persistence.LevelUp
-  },
   http: {
     port: 8080,
     bundle: true,
@@ -19,4 +15,6 @@ var server = new mosca.Server({
   }
   
 });
+var db = new mosca.persistence.LevelUp({ path: "mqttdb" });
+db.wire(server);
 
