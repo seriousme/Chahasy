@@ -5,9 +5,10 @@
   "main": "startMosca.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-	"start": "startMosca.js",
+    "start": "startMosca.js",
     "mosca": "startMosca.js",
-	"rules": "ruleEngine.js"
+    "rules": "ruleEngine.js", 
+	"load": "loadMosca.js"
   },
   "repository": {
     "type": "git",
@@ -24,8 +25,8 @@
   },
   "homepage": "https://github.com/seriousme/Chahasy",
   "dependencies": {
-    "mosca": "^1.0.2",
-    "mqtt": "^1.7.0",
-    "leveldown":"^1.4.3"
+    "leveldown": "^1.4.3",
+    "mosca": "^1.1.0",
+    "mqtt": "^1.7.0"
   }
 }
