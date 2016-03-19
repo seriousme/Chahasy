@@ -42,55 +42,89 @@
 		  <ul class="nav navbar-nav">
 			{{#pages}}
 			<li id="{{id}}" 
-			{{#if (url == currentPage) }}
+			{{#if (url == currentUrl) }}
 			class="active"
 			{{/if}}
 			><a href="{{url}}">{{label}}</a></li>
 			{{/pages}}
 		  </ul>
+		  <ul class="nav navbar-nav navbar-right">
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-option-horizontal"></span></a>
+					<ul class="dropdown-menu">
+						{{#if editMode}}
+							<li><a on-click="editMode:save">Save edits</a></li>
+							<li><a on-click="editMode:discard">Discard edits</a></li>
+						{{else}}
+							<li><a on-click="editMode:start">Edit mode</a></li>
+						{{/if}}
+						<li role="separator" class="divider"></li>
+						<li><a href="#">Config</a></li>
+					</ul>
+				</li>
+			</ul>
 		</div><!--/.nav-collapse -->
       </div>
     </nav>
 
     <div class="container">
-		<ul class="list-group">
-		  {{#items}}
-		  <li class="list-group-item">{{label}}
-		    {{#if (type == "button")}}
-			<span class="pull-right"><button class="btn btn-default" onclick="{{publishClick(topic)}}">{{btntext}}</button></span>
-			{{/if}}
-		    {{#if (type == "toggle")}}
-			<div class="btn-group btn-toggle pull-right" data-topic="{{topic}}"> 
-				{{#if (value == "on")}}
-					<button class="btn btn-primary active">ON</button>
-					<button class="btn btn-default">OFF</button>
-				{{else}}
-					<button class="btn btn-default">ON</button>
-					<button class="btn btn-primary active">OFF</button>
+			<ul id="itemList" class="list-group {{editMode ? 'moveable' : ''}}">
+		    {{#linkedItems}}
+		    <li class="list-group-item" data-id="{{id}}">
+				{{#if editMode}}
+				<i class="js-remove pull-left">✖</i>
 				{{/if}}
-			</div>
-			{{/if}}
-			{{#if (type == "output") }}
-			<span class="pull-right">{{value}}</span>
-			{{/if}}
-			{{#if (type == "temp")}}
-			<span class="pull-right">{{ formatTemp(value) }}</span>
-			{{/if}}
-			{{#if ((type == "dimmer") && value)}}
-			<span class="pull-right"><input type="range" min="0" max="255" value="{{value}}" oninput="{{publishDimmer(topic)}}" list="dimsettings"></span>
-			<datalist id="dimsettings">
-				<option>0</option>
-				<option>51</option>
-				<option>102</option>
-				<option>153</option>
-				<option>204</option>
-				<option>255</option>
-			</datalist>
-			{{/if}}
-		  </li>
-		  {{/items}}
+				{{label}}
+				<span class="pull-right"> 
+					{{#if (type == "button")}}
+					<button class="btn btn-default" on-click="publish:{{topic}},'clicked'">{{btntext}}</button>
+					{{/if}}
+					{{#if (type == "toggle")}}
+					<div class="btn-group btn-toggle pull-right" on-click="publish:{{topic}},{{(value == 'off') ? 'on' : 'off'}}"> 
+						{{#if (value == "on")}}
+							<button class="btn btn-primary active">ON</button>
+							<button class="btn btn-default">OFF</button>
+						{{else}}
+							<button class="btn btn-default">ON</button>
+							<button class="btn btn-primary active">OFF</button>
+						{{/if}}
+					</div>
+					{{/if}}
+					{{#if (type == "output") }}
+						{{value}}
+					{{/if}}
+					{{#if ((type == "temp") && value)}}
+						{{value}}°C 
+					{{/if}}
+					{{#if ((type == "dimmer") && value)}}
+					<input type="range" min="0" max="255" value="{{value}}" on-input="publish:{{topic}},'{{this.value}}'" list="dimsettings">
+					<datalist id="dimsettings">
+						<option>0</option>
+						<option>51</option>
+						<option>102</option>
+						<option>153</option>
+						<option>204</option>
+						<option>255</option>
+					</datalist>
+					{{/if}}
+				</span>
+			</li>
+			{{/linkedItems}}
 		</ul>
-
+		<ul class="list-group">
+			{{#if editMode}}
+				{{#if unusedItems }}
+				<li class="list-group-item">
+				  	<span id="plus" class="glyphicon glyphicon-plus" aria-hidden="true" on-click="addItem:{{selectedItem}}"></span>
+					<select id="selectItem" value="{{selectedItem}}">
+						{{#unusedItems:i}}
+							<option value="{{id}}">{{label}}</option>
+						{{/unusedItems}}
+					</select>
+				</li>		
+				{{/if}}
+			{{/if}}
+		</ul>
     </div><!-- /.container -->
 	<!-- end of ractive template -->
 </script>
@@ -100,6 +134,7 @@
     <!-- Placed at the end of the document so the pages load faster -->
 	<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Sortable/1.4.2/Sortable.min.js"></script>
 	<script src='http://cdn.ractivejs.org/latest/ractive.js'></script>
 	<!-- MQTT client over websockets, automagically served by mosca -->
 	<script src="/mqtt.js"></script>

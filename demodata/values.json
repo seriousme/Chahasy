@@ -1,5 +1,5 @@
 {
-    "comment": "demo sensor data",
+    "comment": "demo sensor data, load with loadMosca.js if needed",
     "values": [
         {
             "topic": "lamps/l1",

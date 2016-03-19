@@ -1,31 +1,5 @@
 {
-	"comment" : "Demo object data",
-	"pages" : [{
-			"id" : "p1",
-			"label" : "Favorites",
-			"url" : "#favorites",
-			"items" : ["l1", "l2", "l3", "l4", "d1", "d2", "t1","g1"]
-		}, {
-			"id" : "p2",
-			"label" : "Living room",
-			"url" : "#living",
-			"items" : ["l1", "l2","d1","t1"]
-		}, {
-			"id" : "p3",
-			"label" : "Kitchen",
-			"url" : "#kitchen",
-			"items" : ["l3", "d2"]
-		}, {
-			"id" : "p4",
-			"label" : "Hallway",
-			"url" : "#hallway",
-			"items" : ["l4", "d1","d2"]
-		},{
-			"id" : "p5",
-			"label" : "Setup",
-			"url" : "setup.html"
-		}
-	],
+	"comment" : "Demo item data, the items are used in pages.json, load with loadMosca.js if needed",
 	"items" : [{
 			"id" : "l1",
 			"label" : "Lamp 1",

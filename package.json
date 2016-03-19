@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "startMosca.js",
     "mosca": "startMosca.js",
-    "rules": "ruleEngine.js", 
-	"load": "loadMosca.js"
+    "rules": "ruleEngine.js",
+    "load": "loadMosca.js"
   },
   "repository": {
     "type": "git",
