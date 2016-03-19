@@ -10,7 +10,7 @@
     <link href="pics/icon-56x56.png" rel="apple-touch-icon" />
     <link rel="shortcut icon" sizes="196x196" href="pics/icon-196x196.png">
 
-    <title>Chahasy experimental layout</title>
+    <title>Chahasy</title>
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
@@ -42,7 +42,7 @@
 		  <ul class="nav navbar-nav">
 			{{#pages}}
 			<li id="{{id}}" 
-			{{#if (url == currentUrl) }}
+			{{#if (url == page.url) }}
 			class="active"
 			{{/if}}
 			><a href="{{url}}">{{label}}</a></li>
@@ -66,7 +66,8 @@
 		</div><!--/.nav-collapse -->
       </div>
     </nav>
-
+	
+	{{#page}}
     <div class="container">
 			<ul id="itemList" class="list-group {{editMode ? 'moveable' : ''}}">
 		    {{#linkedItems}}
@@ -111,13 +112,14 @@
 			</li>
 			{{/linkedItems}}
 		</ul>
+		
 		<ul class="list-group">
 			{{#if editMode}}
 				{{#if unusedItems }}
 				<li class="list-group-item">
-				  	<span id="plus" class="glyphicon glyphicon-plus" aria-hidden="true" on-click="addItem:{{selectedItem}}"></span>
+				  	<span id="plus" class="glyphicon glyphicon-plus" aria-hidden="true" on-click="addPageItem:{{page.url}},{{selectedItem}}"></span>
 					<select id="selectItem" value="{{selectedItem}}">
-						{{#unusedItems:i}}
+						{{#unusedItems}}
 							<option value="{{id}}">{{label}}</option>
 						{{/unusedItems}}
 					</select>
@@ -126,6 +128,8 @@
 			{{/if}}
 		</ul>
     </div><!-- /.container -->
+	{{/page}}
+	
 	<!-- end of ractive template -->
 </script>
 

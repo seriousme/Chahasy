@@ -43,24 +43,18 @@ function savePageEdits(){
 
 function discardPageEdits(){
 	pages = clone( pagesMessage.pages );
-	indexPages();
 	setPage(currentUrl);
 }
 
 function setPage(url){
-	var newPageId = pageIdx[url];
-	if (typeof(newPageId) != 'undefined'){
-		currentUrl= url;
-		var linkedItems=pages[newPageId].linkedItems;
-		var unusedItems=pages[newPageId].unusedItems;
-		var selectedItem= unusedItems.length ? unusedItems[0].id : undefined;
+	var page = pageIdx[url];
+	if (typeof(page != 'undefined')){
+		prepPage(page);
 		ractive.set({
 			pages:pages,
-			linkedItems:linkedItems,
-			unusedItems:unusedItems,
-			selectedItem: selectedItem,
-			currentUrl: currentUrl
+			page:page
 		});
+		currentUrl= url;
 	}
 }
 
@@ -76,18 +70,16 @@ function publish(topic,value){
 	mqttClient.publish(topic, value);
 }
 
-function indexItems(){
+function registerTopics(){
 	// remove existing subscriptions
 	var topics= Object.keys(topicIdx);
 	if (topics.length){
 		mqttClient.unsubscribe(topics);
 	}
 	// reset the indexes
-	itemIdx={};
 	topicIdx={};
 	// process the items
 	allItems.forEach(function (item){
-		itemIdx[item.id] = item;
 		topicIdx[item.topic] = item;
 	});
 	// subscribe to all topics found
@@ -95,50 +87,57 @@ function indexItems(){
 }
 
 function addPageItem(url,item){
-	var pageId=pageIdx[url];
-	var page=pages[pageId];
+	var page=pageIdx[url];
 	page.items.push(item);
-	indexPage(page,pageId);
 	setPage(url);
 }
 
 function updatePageItems(url,items){
-	var pageId=pageIdx[url];
-	var page=pages[pageId];
+	var page=pageIdx[url];
 	page.items=items;
-	indexPage(page,pageId);
 	setPage(url);
 }
 
-
-// Index pages by URL and replace items by links to items (if any)
-// create a list of items not used on the page so users can add them
-function indexPage(page,i){
-	 var seenItem={};
-	 pageIdx[page.url] = i;
-	 if ( page.items ){
+// Prepare page for viewing by setting linkedItems and for editing by setting unusedItems
+function prepPage(page){
+	var itemIdx={};
+	if ( page.items ){
 		page.unusedItems=[];
 		page.linkedItems=[];
-		page.items.forEach( function (item,i,arr){
-			seenItem[ item ] = true;
-			page.linkedItems.push(itemIdx[ item ]);
-			});
-		allItems.forEach( function (item, i, arr){
-			if (! seenItem[item.id]){
-				page.unusedItems.push(item);
-			}
+		// build up the index
+		allItems.forEach(function (item){
+			itemIdx[item.id] = item;
 		});
-	 }
+		// link the page to the items
+		page.linkedItems = page.items.map( function (item,i,arr){
+			return itemIdx[ item ];
+			});
+		// all items that are not in the page
+		allItems.forEach( function (item, i, arr){
+				if (page.items.indexOf(item.id) <0){
+					page.unusedItems.push(item);
+				};
+			});
+		// set the default selected item
+		if (typeof(page.unusedItems[0]) == 'object'){
+			page.selectedItem = page.unusedItems[0].id;
+		}
+	}
 }
 
+// index Pages by URL
 function indexPages(){
 	// and index the pages
-	pages.forEach(indexPage);
+	pages.forEach(function(page){
+		pageIdx[page.url] = page;
+	});
 }
 
+// deep clone helper
 function clone(obj){
 	return JSON.parse(JSON.stringify(obj));
 }
+
 
 // start the UI
 function initUI(){
@@ -156,12 +155,39 @@ function initUI(){
 	setEditMode(false);
 	// listen for URL changes
 	window.onhashchange = function(){ setPage(location.hash);};
-	
 	// make sure we do this only once
 	inited=true;
 }
 
-var pages=[], pagesMessage={}, pageIdx={}, topicIdx={}, allItems=[], itemsMessage={}, itemIdx={}, currentUrl, editableList, inited=false;
+// handle incoming config messages
+function handleConfig(topic,message){
+	var data = JSON.parse(message);
+	if (topic ==  (configTopic + "items")){
+		itemsMessage = data;
+	}
+	if (topic == (configTopic + "pages")){
+		pagesMessage = data;
+	}
+	// continue if we have both items and pages data
+	if (itemsMessage.items && pagesMessage.pages){
+		// deep clone items so we keep the original messages
+		allItems = clone( itemsMessage.items );
+		pages = clone( pagesMessage.pages );
+		indexPages();
+		
+		registerTopics();
+		if (! inited){
+			initUI();
+		}
+		else{
+			setPage(currentUrl);
+		}
+	}
+}
+
+
+var pages=[], pagesMessage={}, pageIdx={}, topicIdx={}, allItems=[], itemsMessage={}, currentUrl, editableList, inited=false;
+var configTopic = "config/chahasy/ui/";
 
 // polyfill for ES6 startsWith
 if (!String.prototype.startsWith) {
@@ -197,8 +223,8 @@ ractive.on('editMode',function (event,val){
 	}
 });
 
-ractive.on('addItem',function (event,item){
-	addPageItem(currentUrl,item);	
+ractive.on('addPageItem',function (event,url,item){
+	addPageItem(url,item);	
 });
 
 // start MQTT
@@ -206,35 +232,14 @@ var mqttClient = mqtt.connect();
 
 // setup the listener for connect messages
 mqttClient.on("connect", function(){
-	mqttClient.subscribe("config/chahasy/ui/#");
+	mqttClient.subscribe(configTopic+"#");
 });
 
 // setup the listener for published messages
 mqttClient.on("message", function(topic, payload) {
 	var message = payload.toString();
-	if (topic.startsWith("config/chahasy/ui/")){
-		var data = JSON.parse(message);
-		
-		if (topic == "config/chahasy/ui/items"){
-			itemsMessage = data;
-		}
-		if (topic == "config/chahasy/ui/pages"){
-			pagesMessage = data;
-		}
-		// continue if we have both items and pages data
-		if (itemsMessage.items && pagesMessage.pages){
-			// deep clone items so we keep the original messages
-			allItems = clone( itemsMessage.items );
-			pages = clone( pagesMessage.pages );
-			indexItems();
-			indexPages();
-			if (! inited){
-				initUI();
-			}
-			else{
-				setPage(currentUrl);
-			}
-		}
+	if (topic.startsWith(configTopic)){
+		handleConfig(topic,message);
 	}
 	else{
 		setVal(topic,message);
