@@ -1,5 +1,12 @@
 // experiment to create a simple rule engine
 
+// allow the mqtt server to connect to to be specified as environment variable
+var mqttUrl = process.env.mqttUrl || 'mqtt://localhost';
+// or as commandline option
+if (process.argv[2]){
+	mqttUrl = process.argv[2];
+}
+
 var rules = require("./rules/demoRules.js");
 
 function publish(topic,value){
@@ -8,7 +15,9 @@ function publish(topic,value){
 }
 
 var mqtt = require('mqtt');
-var mqttClient = mqtt.connect();
+console.log("Starting rule engine, trying to connect to:",mqttUrl);
+
+var mqttClient = mqtt.connect(mqttUrl);
 
 mqttClient.on("connect", function(){
 	// subscribe to events that trigger rules
