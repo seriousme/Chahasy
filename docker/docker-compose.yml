@@ -1,0 +1,41 @@
+version: '2'
+# a docker compose file to split chahasy up in three containers
+# - the core MQTT server
+# - the HTTP server serving the UI and the websockets bridge
+# - the rules engine
+# due to bug in docker dns is case sensitive https://github.com/docker/libnetwork/issues/993
+services:
+  web:
+    image: seriousme/chahasy
+    ports:
+     - "8080:8080"
+    links:
+     - mqttserver
+    entrypoint:
+     - /usr/src/app/node_modules/.bin/mosca 
+     - --http-port
+     - "8080"
+     - --http-bundle
+     - --http-static
+     - /usr/src/app/public
+     - --only-http
+     - --parent-host
+     - mqttserver
+     - -v
+  ruleEngine:
+    image: seriousme/chahasy
+    links:
+     - mqttserver
+    entrypoint: 
+       - /usr/bin/node 
+       - /usr/src/app/ruleEngine.js 
+       - "mqtt://mqttserver"
+  mqttserver:
+    image: seriousme/chahasy
+    ports: 
+    - "1883:1883"
+    entrypoint:
+    - /usr/src/app/node_modules/.bin/mosca
+    - --db
+    - /usr/src/app/mqttdb
+    - -v 
