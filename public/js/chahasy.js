@@ -158,6 +158,7 @@ function indexPages(){
 }
 
 // deep clone helper
+// should use ES6 Object.assign instead
 function clone(obj){
 	return JSON.parse(JSON.stringify(obj));
 }
@@ -217,11 +218,11 @@ if (!String.prototype.startsWith) {
   };
 }
 
-function init(){
+function init(template){
 	// create the ractive object
 	ractive = new Ractive({
 		el: renderOutput,
-		template: '#renderTemplate'
+		template: template
 	});
 
 	// define ractive event listeners 
@@ -265,6 +266,6 @@ exports.init = init;
 
 // if we have all required resources: start the show !
 $(document).ready(function(){
-	chahasy.init();
+	chahasy.init('#renderTemplate');
 });
 
