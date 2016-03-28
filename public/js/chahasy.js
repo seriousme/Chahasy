@@ -1,4 +1,13 @@
+///////////////////////////////////////////////////////////////
+// chahasy.js
+// all the logic is triggered by ractive events.
 
+// make it a module, see end of file
+( function (exports){
+	
+var configTopic = "config/chahasy/ui/";
+var ractive, mqttClient, currentUrl, editableList, inited=false;
+var pages=[], pagesMessage={}, pageIdx={}, topicIdx={}, allItems=[], itemsMessage={};
 
 function addSortable(id){
 	var obj = Sortable.create(document.getElementById(id), {
@@ -17,6 +26,21 @@ function addSortable(id){
 	return obj;
 }
 
+// handle the ractive "editMode" event
+function handleEditMode(val){
+	if (val == "start"){
+		setEditMode(true);
+		return;
+	}
+	if (val == "save"){
+		savePageEdits();
+	}
+	else {
+		discardPageEdits();
+	}
+	setEditMode(false);
+}
+	
 function setEditMode(mode){
 	if (mode){
 		// prepare for edit mode
@@ -38,7 +62,7 @@ function savePageEdits(){
 		}
 	});
 	var options = { "qos":0,"retain": true };
-	mqttClient.publish("config/chahasy/ui/pages",JSON.stringify(pagesMessage),options);
+	mqttClient.publish(configTopic  + "pages",JSON.stringify(pagesMessage),options);
 }
 
 function discardPageEdits(){
@@ -185,10 +209,6 @@ function handleConfig(topic,message){
 	}
 }
 
-
-var pages=[], pagesMessage={}, pageIdx={}, topicIdx={}, allItems=[], itemsMessage={}, currentUrl, editableList, inited=false;
-var configTopic = "config/chahasy/ui/";
-
 // polyfill for ES6 startsWith
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function(searchString, position){
@@ -197,53 +217,54 @@ if (!String.prototype.startsWith) {
   };
 }
 
-// create the ractive object
-var ractive = new Ractive({
-	el: renderOutput,
-	template: '#renderTemplate'
-});
+function init(){
+	// create the ractive object
+	ractive = new Ractive({
+		el: renderOutput,
+		template: '#renderTemplate'
+	});
 
-// define event listeners
-ractive.on('publish',function (event,topic,value){
-	publish(topic,value);	
-});
+	// define ractive event listeners 
+	// form wants to publish a value
+	ractive.on('publish',function (event,topic,value){
+		publish(topic,value);	
+	});
+    // form changes to/from edit mode
+	ractive.on('editMode',function (event,val){
+		handleEditMode(val);
+	});
+    // form wants to add an item to a page (in edit mode)
+	// delete and move is handled by Sortable
+	ractive.on('addPageItem',function (event,url,item){
+		addPageItem(url,item);	
+	});
 
-ractive.on('editMode',function (event,val){
-	if (val == "start"){
-		setEditMode(true);
-	}
-	else{
-		if (val == "save"){
-			savePageEdits();
+	// start MQTT
+	mqttClient = mqtt.connect();
+
+	// setup the MQTT listener for connect messages
+	mqttClient.on("connect", function(){
+		mqttClient.subscribe(configTopic+"#");
+	});
+
+	// setup the MQTT listener for published messages
+	mqttClient.on("message", function(topic, payload) {
+		var message = payload.toString();
+		if (topic.startsWith(configTopic)){
+			handleConfig(topic,message);
 		}
-		else {
-			discardPageEdits();
+		else{
+			setVal(topic,message);
 		}
-		setEditMode(false);
-	}
+	});
+}
+// end of module, this is our module interface to the world
+exports.init = init;
+})(this.chahasy = {});
+
+
+// if we have all required resources: start the show !
+$(document).ready(function(){
+	chahasy.init();
 });
-
-ractive.on('addPageItem',function (event,url,item){
-	addPageItem(url,item);	
-});
-
-// start MQTT
-var mqttClient = mqtt.connect();
-
-// setup the listener for connect messages
-mqttClient.on("connect", function(){
-	mqttClient.subscribe(configTopic+"#");
-});
-
-// setup the listener for published messages
-mqttClient.on("message", function(topic, payload) {
-	var message = payload.toString();
-	if (topic.startsWith(configTopic)){
-		handleConfig(topic,message);
-	}
-	else{
-		setVal(topic,message);
-	}
-});
-
 
