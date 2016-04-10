@@ -1,6 +1,6 @@
 {
   "name": "Chahasy",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Home automation using MQTT",
   "main": "startMosca.js",
   "scripts": {
@@ -26,7 +26,7 @@
   "homepage": "https://github.com/seriousme/Chahasy",
   "dependencies": {
     "leveldown": "^1.4.3",
-    "mosca": "^1.1.0",
-    "mqtt": "^1.7.0"
+    "mosca": "^1.1.3",
+    "mqtt": "^1.8.0"
   }
 }
