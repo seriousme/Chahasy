@@ -25,8 +25,8 @@
   },
   "homepage": "https://github.com/seriousme/Chahasy",
   "dependencies": {
-    "leveldown": "^1.4.3",
-    "mosca": "^1.2.0",
-    "mqtt": "^1.8.0"
+    "leveldown": "^1.4.6",
+    "mosca": "^2.0.2",
+    "mqtt": "^1.14.0"
   }
 }
