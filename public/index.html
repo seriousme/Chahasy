@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,135 +15,117 @@
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-	
-	 <!-- Bootstrap theme -->
+
+    <!-- Bootstrap theme -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="css/starter-template.css" rel="stylesheet">
-  </head>
+</head>
 
-  <body>
-	<div id="renderOutput"></div>
-	
-<script id="renderTemplate" type="text/ractive">
-    <!-- start of ractive template -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+<body>
+    <div id="chahasy">
+        <!-- start of vue.js template -->
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Chahasy</a>
-        </div>
-		<div id="navbar" class="collapse navbar-collapse">
-		  <ul class="nav navbar-nav">
-			{{#pages}}
-			<li id="{{id}}" 
-			{{#if (url == page.url) }}
-			class="active"
-			{{/if}}
-			><a href="{{url}}">{{label}}</a></li>
-			{{/pages}}
-		  </ul>
-		  <ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-option-horizontal"></span></a>
-					<ul class="dropdown-menu">
-						{{#if editMode}}
-							<li><a on-click="editMode:save">Save edits</a></li>
-							<li><a on-click="editMode:discard">Discard edits</a></li>
-						{{else}}
-							<li><a on-click="editMode:start">Edit mode</a></li>
-						{{/if}}
-						<li role="separator" class="divider"></li>
-						<li><a href="#">Config</a></li>
-					</ul>
-				</li>
-			</ul>
-		</div><!--/.nav-collapse -->
-      </div>
-    </nav>
-	
-	{{#page}}
-    <div class="container">
-			<ul id="itemList" class="list-group {{editMode ? 'moveable' : ''}}">
-		    {{#linkedItems}}
-		    <li class="list-group-item" data-id="{{id}}">
-				{{#if editMode}}
-				<i class="js-remove pull-left">✖</i>
-				{{/if}}
-				{{label}}
-				<span class="pull-right"> 
-					{{#if (type == "button")}}
-					<button class="btn btn-default" on-click="publish:{{topic}},'clicked'">{{btntext}}</button>
-					{{/if}}
-					{{#if (type == "toggle")}}
-					<div class="btn-group btn-toggle pull-right" on-click="publish:{{topic}},{{(value == 'off') ? 'on' : 'off'}}"> 
-						{{#if (value == "on")}}
+                    <a class="navbar-brand" href="#">Chahasy</a>
+                </div>
+                <div id="navbar" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li v-for="p in pages" v-bind:id="p.id" v-bind:class="[{'active':(p.url==page.url)}]"> <a v-bind:href="p.url">{{p.label}}</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-option-horizontal"></span></a>
+                            <ul class="dropdown-menu">
+                                <template v-if="editMode">
+                                  <li><a v-on:click="setEditMode('save')">Save edits</a></li>
+                                  <li><a v-on:click="setEditMode('discard')">Discard edits</a></li>
+                                </template>
+                                <template v-else>
+                                  <li><a v-on:click="setEditMode('start')">Edit mode</a></li>
+                                </template>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="#">Config</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+        </nav>
+
+        <div class="container">
+            <ul id="itemList" v-bind:class="['page.list-group',{ 'moveable': editMode }]">
+                <li v-for="item in page.linkedItems" class="list-group-item" v-bind:data-id="item.id">
+                    <i v-if="editMode" class="js-remove pull-left">✖</i> {{item.label}}
+                    <span class="pull-right">
+					<template v-if="(item.type == 'button')">
+					       <button class="btn btn-default" v-on:click="publish(item.topic,'clicked')">{{item.btntext}}</button>
+					</template>
+          <template v-if="(item.type == 'toggle')">
+					<div class="btn-group btn-toggle pull-right" v-on:click="publish(item.topic,(item.value == 'off') ? 'on' : 'off')">
+						  <template v-if="(item.value == 'on')">
 							<button class="btn btn-primary active">ON</button>
-							<button class="btn btn-default">OFF</button>
-						{{else}}
+							        <button class="btn btn-default">OFF</button>
+              </template>
+						  <template v-else>
 							<button class="btn btn-default">ON</button>
 							<button class="btn btn-primary active">OFF</button>
-						{{/if}}
+						   </template>
 					</div>
-					{{/if}}
-					{{#if (type == "output") }}
-						{{value}}
-					{{/if}}
-					{{#if ((type == "temp") && value)}}
-						{{value}}°C 
-					{{/if}}
-					{{#if ((type == "dimmer") && value)}}
-					<input type="range" min="0" max="255" value="{{value}}" on-input="publish:{{topic}},'{{this.value}}'" list="dimsettings">
-					<datalist id="dimsettings">
-						<option>0</option>
-						<option>51</option>
-						<option>102</option>
-						<option>153</option>
-						<option>204</option>
-						<option>255</option>
-					</datalist>
-					{{/if}}
+					</template>
+          <template v-if="(item.type == 'output')">
+						{{ item.value }}
+					  </template>
+					<template v-if="((item.type == 'temp') && item.value)">
+						{{ item.value }}°C
+					  </template>
+          <template v-if="((item.type == 'dimmer') && item.value)">
+  					<input type="range" min="0" max="255" v-bind:value="item.value" v-on:input="publish(item.topic,$event.target.value)" list="dimsettings">
+  					<datalist id="dimsettings">
+  						<option>0</option>
+  						<option>51</option>
+  						<option>102</option>
+  						<option>153</option>
+  						<option>204</option>
+  						<option>255</option>
+  					</datalist>
+					</template>
 				</span>
-			</li>
-			{{/linkedItems}}
-		</ul>
-		
-		<ul class="list-group">
-			{{#if editMode}}
-				{{#if unusedItems }}
-				<li class="list-group-item">
-				  	<span id="plus" class="glyphicon glyphicon-plus" aria-hidden="true" on-click="addPageItem:{{page.url}},{{selectedItem}}"></span>
-					<select id="selectItem" value="{{selectedItem}}">
-						{{#unusedItems}}
-							<option value="{{id}}">{{label}}</option>
-						{{/unusedItems}}
-					</select>
-				</li>		
-				{{/if}}
-			{{/if}}
-		</ul>
-    </div><!-- /.container -->
-	{{/page}}
-	
-	<!-- end of ractive template -->
-</script>
+      </li>
+            </ul>
 
+            <ul class="list-group">
+                <li v-if="(editMode && (page.unusedItems.length > 0))" class="list-group-item">
+                    <span id="plus" class="glyphicon glyphicon-plus" aria-hidden="true" v-on:click="addPageItem(page.url,page.selectedItem)"></span>
+                    <select id="selectItem" v-bind:value="page.selectedItem">
+							               <option v-for="option in page.unusedItems" v-bind:value="option.id">{{option.label}}</option>
+					          </select>
+                </li>
+            </ul>
+        </div>
+        <!-- end of vue.js template -->
+    </div>
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-	<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/Sortable/1.4.2/Sortable.min.js"></script>
-	<script src='http://cdn.ractivejs.org/latest/ractive.js'></script>
-	<!-- MQTT client over websockets, automagically served by mosca -->
-	<script src="/mqtt.js"></script>
-	<!-- the application -->
-	<script src='js/chahasy.js'></script>
-  </body>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/Sortable/1.4.2/Sortable.min.js"></script>
+    <script type="text/javascript" src='http://cdnjs.cloudflare.com/ajax/libs/vue/2.0.3/vue.js'></script>
+    <!-- MQTT client over websockets, automagically served by mosca -->
+    <script type="text/javascript" src="/mqtt.js"></script>
+    <!-- the application -->
+    <script type="text/javascript" src='js/chahasy.js'></script>
+</body>
+
 </html>
