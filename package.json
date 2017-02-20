@@ -27,6 +27,6 @@
   "dependencies": {
     "leveldown": "^1.5.0",
     "mosca": "^2.2.0",
-    "mqtt": "^1.14.1"
+    "mqtt": "^2.4.0"
   }
 }
