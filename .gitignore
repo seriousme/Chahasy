@@ -42,5 +42,9 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-#nodejs
+# nodejs
 node_modules
+
+# project
+mqttdb
+

@@ -1,8 +1,8 @@
 # Chahasy on Mosca on Alpine
 #
-# VERSION 0.3.0
+# VERSION 0.4.0
 
-FROM mhart/alpine-node:4
+FROM mhart/alpine-node:8
 MAINTAINER Hans Klunder <hans.klunder@bigfoot.com>
 
 RUN mkdir -p /usr/src/app
