@@ -1,8 +1,8 @@
-# Chahasy on Mosca on Alpine
+# Chahasy on Aedes on Alpine
 #
-# VERSION 0.4.0
+# VERSION 0.5.0
 
-FROM mhart/alpine-node:8
+FROM mhart/alpine-node:10
 MAINTAINER Hans Klunder <hans.klunder@bigfoot.com>
 
 RUN mkdir -p /usr/src/app
@@ -11,9 +11,7 @@ WORKDIR /usr/src/app/
 COPY ./ /usr/src/app/
 
 RUN apk update && \
-    apk add make gcc g++ python git && \
-    npm install --unsafe-perm --production && \
-    apk del make gcc g++ python git
+    npm install --unsafe-perm --production
 
 EXPOSE 8080
 EXPOSE 1883
